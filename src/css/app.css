@@ -27,17 +27,14 @@ body {
 	color: var(--black);
 	font-family: Shift-BoldItalic, serif;
 	font-size: 2rem;
-	margin-bottom: 0.5rem;
+	/* margin-bottom: 0.5rem; */
 }
 #app h2 {
 	color: var(--black);
 	font-family: BentonSansCond-Bold, serif;
 	margin: 1px 0;
 }
-#app h3 {
-	color: var(--black);
-	font-family: BentonSansCond-Bold, serif;
-}
+
 #app h4 {
 	color: var(--black);
 	font-family: BentonSansCond-Regular, serif;

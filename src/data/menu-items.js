@@ -81,12 +81,12 @@ export const menuItems = [
   },
   {
     "id": "85",
-    "label": "City of North Vancouver",
+    "label": "North Vancouver (C)",
     "value": "north-vancouver-city"
   },
   {
     "id": "86",
-    "label": "District of North Vancouver",
+    "label": "North Vancouver (D)",
     "value": "north-vancouver-district"
   },
   {

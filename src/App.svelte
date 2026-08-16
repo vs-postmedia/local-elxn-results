@@ -9,6 +9,13 @@
     import { menuItems } from "$data/menu-items";
     const dataUrl = 'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json';
 
+    // TEST CODE
+    let currentURL = 0;
+    const dataURLs = [
+        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json',
+        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022-test.json'
+    ]
+
     // VARIABLES
     let value = null;
     let data = [];
@@ -86,6 +93,7 @@
     function updateData(selectedValue) {
         console.log('UPDATE DATA');
         console.log(selectedValue)
+
         const selectedKey = typeof selectedValue === 'string'
             ? selectedValue
             : selectedValue?.id ?? selectedValue?.value;
@@ -105,11 +113,6 @@
 
         filteredData = [match];
         splitData(match);
-        // cache currently selected city
-        console.log(selectedKey)
-        // value = selectedValue.id;
-        
-        console.log(value)
     }
 
     function updateSelectMenu() {
@@ -145,7 +148,13 @@
         init();
 
         const refreshData = setInterval(() => {
-            fetchData(dataUrl);
+            if (currentURL === 0) {
+                currentURL = 1;
+            } else {
+                currentURL = 0
+            }
+            console.log(currentURL)
+            fetchData(dataURLs[currentURL]);
         }, refreshInterval * 60 * 1000);
 
         return () => clearInterval(refreshData);
@@ -154,7 +163,7 @@
 
 
 <header>
-    <h1>2026 local election results</h1>
+    <h1>2026 local election results for</h1>
     <!-- <p class="subhead">Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p> -->
 </header>
 
@@ -163,7 +172,6 @@
         location={location}
     /> -->
 
-    <h2 class="select-header">Choose a city:</h2>
     <Select items={menuItems}
         itemId="id"
         bind:value
@@ -172,6 +180,7 @@
 		showChevron="true"
 		listOpen={false}
     />
+    <p class="select-header">Choose a city  <span>⤴️</span></p>
 
     {#key value?.value || 'default'}
         <Candidates
@@ -204,7 +213,7 @@
     @import '$css/app.css';
 
     header {
-		margin-bottom: 2rem;
+		/* margin-bottom: 2rem; */
 	}
 	header > h1 {
 		text-align: center;
@@ -216,23 +225,51 @@
 	}
 
     /* COMBOBOX SELECTOR */
-    .select-header {
-        font-size: 1.35rem;
+    :global(p.select-header) {
+        color: var(--grey03) !important;
+        font-family: 'BentonSansCond-RegItalic', italic !important;
+        font-size: 1rem;
+        margin: 0 auto 2vh 0;
         text-align: center;
     }
+     :global(p.select-header > span) {
+        filter: greyscale(1);
+        font-size: 0.85rem;
+     }
   	:global(.svelte-select) {
-		margin: 1rem auto !important;
-		max-width: 250px;
+        border: none !important;
+		margin: 0 auto !important;
+        width: auto !important;
+        /* max-width: 250px; */
   	}
-  	:global(input:focus) {
-		outline: none;
-  	}
+    :global(.svelte-select .value-container) {
+        justify-content: center;
+        text-align: center;
+    }
+    :global(.svelte-select .selected-item) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        text-align: center;
+        padding-right: 0;
 
-	:global(
-		.svelte-select .selected-item,
+        color: var(--blue01) !important;
+        font-family: 'Shift-BoldItalic', serif;
+        font-size: 2rem !important;
+		/* font-family: 'BentonSansCond-Regular', sans; */
+    }
+    :global(.svelte-select .indicators) {
+        position: fixed !important;
+        right: 0 !important;
+    }
+
+    :global(
+		/* .svelte-select .selected-item, */
 		.svelte-select .item,
 		.svelte-select input
 	) {
+
 		font-family: 'BentonSansCond-Regular', sans;
 	}
 </style>
