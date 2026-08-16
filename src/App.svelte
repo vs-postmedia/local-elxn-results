@@ -13,12 +13,13 @@
     let value = null;
     let data = [];
     let filteredData = [];
-    let jurisdiction = 'city';
+    // let jurisdiction = 'city';
+    let selectedValue = '139';
     let location = {};
     let mayors = [];
     let councillors = [];
-    const refreshInterval = 5; // in minutes
-    const defaultSelectValue = menuItems.find(item => String(item.id) === '1')?.id ?? menuItems[0]?.id ?? '';
+    const refreshInterval = 1; // in minutes
+    const defaultSelectValue = menuItems.find(item => String(item.id) === selectedValue)?.id ?? menuItems[0]?.id ?? '';
 
     $: if (value && data.length) {
         updateData(value);
@@ -28,7 +29,11 @@
         const resp = await fetch(url);
         const rawData = await resp.text();
 
-        return JSON.parse(rawData);
+        // return JSON.parse(rawData);
+        data = JSON.parse(rawData);
+
+        // set select menu
+        updateSelectMenu();
     }
 
     function splitData(currentFilteredData) {
@@ -80,6 +85,7 @@
 
     function updateData(selectedValue) {
         console.log('UPDATE DATA');
+        console.log(selectedValue)
         const selectedKey = typeof selectedValue === 'string'
             ? selectedValue
             : selectedValue?.id ?? selectedValue?.value;
@@ -99,16 +105,27 @@
 
         filteredData = [match];
         splitData(match);
+        // cache currently selected city
+        console.log(selectedKey)
+        // value = selectedValue.id;
+        
+        console.log(value)
+    }
+
+    function updateSelectMenu() {
+        if (!value && defaultSelectValue) {
+            value = menuItems.find(item =>
+                String(item.value) === String(defaultSelectValue) ||
+                String(item.id) === String(defaultSelectValue)
+            ) ?? null;
+        }
     }
 
     async function init() {
-        data = await fetchData(dataUrl);
+        await fetchData(dataUrl);
 
+        // get city from URL params
         const urlParams = new URLSearchParams(window.location.search);
-
-        // if (urlParams.has('name')) {
-        //     const urlName = urlParams.get('name').toLowerCase();
-        //     value = menuItems.find(item => item.value === urlName) ?? null;
         if (urlParams.has('name')) {
             const urlName = urlParams.get('name').toLowerCase();
             value = menuItems.find(item =>
@@ -120,19 +137,15 @@
             value = null;
         }
 
-        if (!value && defaultSelectValue) {
-            value = menuItems.find(item =>
-                String(item.value) === String(defaultSelectValue) ||
-                String(item.id) === String(defaultSelectValue)
-            ) ?? null;
-        }
+        // set select menu
+        updateSelectMenu();
     }
 
     onMount(() => {
         init();
 
         const refreshData = setInterval(() => {
-            init();
+            fetchData(dataUrl);
         }, refreshInterval * 60 * 1000);
 
         return () => clearInterval(refreshData);
