@@ -2,7 +2,7 @@
     export let data = [];
     export let role = '';
     export let scroll_y = '325px';
-    export let value = '';
+    // export let value = '';
 
     import { afterUpdate, onMount } from 'svelte';
     import { Table } from '@flowbite-svelte-plugins/datatable';
@@ -13,7 +13,11 @@
 
     $: datatableOptions = {
         searchable: true,
-        sortable: true,
+        sortable: false,
+        labels: {
+            searchLabel: '',
+            placeholder: 'Search candidates...'
+        },
         // perPage: 10,
         perPageSelect: null,
         paging: false,
