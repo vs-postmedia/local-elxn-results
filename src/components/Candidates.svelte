@@ -1,8 +1,6 @@
 <script>
     export let data = [];
     export let role = '';
-    export let scroll_y = '325px';
-    // export let value = '';
 
     import { afterUpdate, onMount } from 'svelte';
     import { Table } from '@flowbite-svelte-plugins/datatable';
@@ -22,7 +20,7 @@
         perPageSelect: null,
         paging: false,
         // hoverable: true
-        scrollY: scroll_y
+        scrollY: 'auto'
     };
     function addCommasToNumber(number) {
         return Number(number || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -133,6 +131,7 @@
 
 <style>
     .chart-container {
+        margin-bottom: 5vh;
         width: 100%;
     }
 
@@ -144,6 +143,10 @@
         width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+    }
+
+    .chart-container :global(.datatable-container) {
+        max-height: 350px;
     }
 
     .chart-container :global(.datatable-table) {

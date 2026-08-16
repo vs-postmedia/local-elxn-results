@@ -182,12 +182,12 @@
     />
     <p class="select-header">Choose a city  <span>⤴️</span></p>
 
+    <p class="timestamp">Last updated: XXX</p>
+
     {#key value?.value || 'default'}
         <Candidates
             data={mayors}
             role="Mayor"
-            scroll_y="250px"
-            value={value}
         />
     {/key}
     
@@ -195,8 +195,6 @@
         <Candidates
             data={councillors}
             role="Council"
-            scroll_y="325px"
-            value={value}
         />
     {/key}
 </main>
@@ -212,9 +210,6 @@
     @import '$css/colors.css';
     @import '$css/app.css';
 
-    header {
-		/* margin-bottom: 2rem; */
-	}
 	header > h1 {
 		text-align: center;
 	}
@@ -225,7 +220,7 @@
 	}
 
     /* COMBOBOX SELECTOR */
-    :global(p.select-header) {
+    :global(p.select-header, p.timestamp) {
         color: var(--grey03) !important;
         font-family: 'BentonSansCond-RegItalic', italic !important;
         font-size: 1rem;
@@ -260,7 +255,7 @@
 		/* font-family: 'BentonSansCond-Regular', sans; */
     }
     :global(.svelte-select .indicators) {
-        position: fixed !important;
+        position: absolute !important;
         right: 0 !important;
     }
 
