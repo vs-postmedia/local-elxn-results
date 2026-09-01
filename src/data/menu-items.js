@@ -5,6 +5,11 @@ export const menuItems = [
     "value": "abbotsford"
   },
   {
+    "id": "3",
+    "label": "Anmore",
+    "value": "anmore"
+  },
+  {
     "id": "180",
     "label": "Bowen Island",
     "value": "bowen-island"
@@ -143,10 +148,5 @@ export const menuItems = [
     "id": "147",
     "label": "White Rock",
     "value": "white-rock"
-  },
-  {
-    "id": "3",
-    "label": "Anmore",
-    "value": "anmore"
   }
 ];

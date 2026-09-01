@@ -105,20 +105,30 @@
                     <tr class={candidate.elected ? 'YES' : ''}>
                         <td>
                             <div class="candidate-cell">
-                                <div class="candidate-name">{candidate.candidate_first_name || ''} {titleCase(candidate.candidate_last_name) || ''}
-                                <span class='elected-check'>{candidate.elected === 'YES' ? '✅ elected' : '' }</span>
+                                <div class="candidate-name">
+                                {#if candidate.acclamation === 'YES' || candidate.elected == 'YES'}
+                                    <span class='elected-check'>✅</span>
+                                <!-- {:else}
+                                    <span class='elected-check'>{candidate.elected === 'YES' ? '✅ elected' : '' }</span> -->
+                                {/if}
+                                {candidate.candidate_first_name || ''} {titleCase(candidate.candidate_last_name) || ''}
+                                <span class='elected-check'>{candidate.elected === 'YES' && candidate.acclamation !== 'YES' ? ' elected' : '' }
                                 </div>
                                 <div class="party-name">{candidate.electoral_organization?.electoral_organization_name || ''}</div>
                             </div>
                         </td>
                         <td class="votes-cell">
-                            <div class="bar-track">
-                                <div class="bar-fill" style={`width: ${Math.max(4, votesPct)}%`}>
-                                    <div class={`bar-label ${labelClass}`}>
-                                        {votesPct ? `${votesPct.toFixed(1)}%` : '0.0%'}
+                            {#if candidate.acclamation === 'YES'}
+                                <span class='elected-check'>Acclaimed</span>
+                            {:else}
+                                <div class="bar-track">
+                                    <div class="bar-fill" style={`width: ${Math.max(4, votesPct)}%`}>
+                                        <div class={`bar-label ${labelClass}`}>
+                                            {votesPct ? `${votesPct.toFixed(1)}%` : '0.0%'}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            {/if}
                         </td>
                         <td>{addCommasToNumber(candidate.votes_for) || ''}</td>
                         <!-- <td>{addCommasToNumber(candidate.total_votes || 0)}</td> -->
@@ -163,17 +173,17 @@
 
     .chart-container :global(.datatable-table thead th:nth-child(1)),
     .chart-container :global(.datatable-table tbody td:nth-child(1)) {
-        width: 40%;
+        width: 50%;
     }
 
     .chart-container :global(.datatable-table thead th:nth-child(2)),
     .chart-container :global(.datatable-table tbody td:nth-child(2)) {
-        width: 40%;
+        width: 34%;
     }
 
     .chart-container :global(.datatable-table thead th:nth-child(3)),
     .chart-container :global(.datatable-table tbody td:nth-child(3)) {
-        width: 20%;
+        width: 15%;
         text-align: right;
     }
 

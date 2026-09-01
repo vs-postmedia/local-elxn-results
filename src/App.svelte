@@ -13,7 +13,7 @@
     let currentURL = 0;
     const dataURLs = [
         'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json',
-        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022-test.json'
+        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022-v2.json'
     ]
 
     // VARIABLES
@@ -25,6 +25,7 @@
     let location = {};
     let mayors = [];
     let councillors = [];
+    let trustees = [];
     const refreshInterval = 1; // in minutes
     const defaultSelectValue = menuItems.find(item => String(item.id) === selectedValue)?.id ?? menuItems[0]?.id ?? '';
 
@@ -70,6 +71,8 @@
     }
 
     function processCandidates(currentFilteredData) {
+        // console.log('PROCESS CANDIDATES')
+        // console.log(currentFilteredData)
         const candidates = currentFilteredData?.candidates || [];
         const totalVotes = Number(location.ballots_cast || 0);
 
@@ -84,6 +87,14 @@
         // same for councillors
         const councillorCandidates = candidates.filter(d => d.running_for == 'COUNCILLOR');
         councillors = councillorCandidates.map(d => ({
+            ...d,
+            total_votes: totalVotes,
+            votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
+        }));
+
+        // same for school board trustees
+        const trusteeCandidates = candidates.filter(d => d.running_for == 'TRUSTEE');
+        trustees = trusteeCandidates.map(d => ({
             ...d,
             total_votes: totalVotes,
             votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
@@ -153,7 +164,7 @@
             } else {
                 currentURL = 0
             }
-            console.log(currentURL)
+
             fetchData(dataURLs[currentURL]);
         }, refreshInterval * 60 * 1000);
 
@@ -184,6 +195,7 @@
 
     <p class="timestamp">Last updated: XXX</p>
 
+    <!-- key/value block forces Svelte to destroy and recreate the component (and its internal <Table>) whenever the selected city changes -->
     {#key value?.value || 'default'}
         <Candidates
             data={mayors}
@@ -197,6 +209,14 @@
             role="Council"
         />
     {/key}
+
+    {#key value?.value || 'default'}
+        <Candidates
+            data={trustees}
+            role="School board"
+        />
+    {/key}
+
 </main>
 
 <footer>
@@ -228,7 +248,6 @@
         text-align: center;
     }
      :global(p.select-header > span) {
-        filter: greyscale(1);
         font-size: 0.85rem;
      }
   	:global(.svelte-select) {
@@ -252,7 +271,6 @@
         color: var(--blue01) !important;
         font-family: 'Shift-BoldItalic', serif;
         font-size: 2rem !important;
-		/* font-family: 'BentonSansCond-Regular', sans; */
     }
     :global(.svelte-select .indicators) {
         position: absolute !important;
@@ -267,4 +285,10 @@
 
 		font-family: 'BentonSansCond-Regular', sans;
 	}
+
+    @media (min-width: 600px) {
+    :global(.svelte-select .selected-item) {
+        font-size: 3rem !important;
+    }
+    }
 </style>
