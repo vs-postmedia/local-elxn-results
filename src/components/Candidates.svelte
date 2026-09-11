@@ -1,6 +1,8 @@
 <script>
     export let data = [];
     export let role = '';
+    export let location = {};
+    export let electedCount = 0;
 
     import { afterUpdate, onMount } from 'svelte';
     import { Table } from '@flowbite-svelte-plugins/datatable';
@@ -8,6 +10,9 @@
     let dataTableInstance = null;
     let resizeTimer;
     let lastRowSignature = '';
+
+    $: console.log('lOCATION')
+    $: console.log(location)
 
     $: datatableOptions = {
         searchable: true,
@@ -22,6 +27,7 @@
         // hoverable: true
         scrollY: 'auto'
     };
+
     function addCommasToNumber(number) {
         return Number(number || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
@@ -87,6 +93,12 @@
 
 <div class="chart-container">
     <h2>{role}</h2>
+    {#if location.trustee}
+        <p class="subhead">{location.name}</p>
+    {/if}
+    {#if location.councillors_to_elect}
+        <p class="subtitle">{electedCount} of {location.councillors_to_elect} candidates elected/acclaimed</p>
+    {/if}
 
     {#if candidateRows.length}
         <Table bind:dataTableInstance={dataTableInstance} dataTableOptions={datatableOptions}>
@@ -107,19 +119,23 @@
                             <div class="candidate-cell">
                                 <div class="candidate-name">
                                 {#if candidate.acclamation === 'YES' || candidate.elected == 'YES'}
-                                    <span class='elected-check'>✅</span>
+                                    <span class='subtitle'>✅</span>
                                 <!-- {:else}
-                                    <span class='elected-check'>{candidate.elected === 'YES' ? '✅ elected' : '' }</span> -->
+                                    <span class='subtitle'>{candidate.elected === 'YES' ? '✅ elected' : '' }</span> -->
                                 {/if}
-                                {candidate.candidate_first_name || ''} {titleCase(candidate.candidate_last_name) || ''}
-                                <span class='elected-check'>{candidate.elected === 'YES' && candidate.acclamation !== 'YES' ? ' elected' : '' }
+                                    {candidate.candidate_first_name || ''} {titleCase(candidate.candidate_last_name) || ''}
+                                
+                                    <span class='subtitle'>{candidate.previous_experience === 'Incumbent' ? ' (Incumbent)' : '' }</span>
+                                    <!-- <span class='subtitle'>{candidate.elected === 'YES' && candidate.acclamation !== 'YES' ? ' elected' : '' }</span> -->
                                 </div>
-                                <div class="party-name">{candidate.electoral_organization?.electoral_organization_name || ''}</div>
+                                <div class="party-name">
+                                    {candidate.electoral_organization?.electoral_organization_name === 'None' ? '' : candidate.electoral_organization?.electoral_organization_name.replace(' Electors', '').replace(' Association', '') || ''}
+                                </div>
                             </div>
                         </td>
                         <td class="votes-cell">
                             {#if candidate.acclamation === 'YES'}
-                                <span class='elected-check'>Acclaimed</span>
+                                <span class='subtitle'>Acclaimed</span>
                             {:else}
                                 <div class="bar-track">
                                     <div class="bar-fill" style={`width: ${Math.max(4, votesPct)}%`}>
@@ -156,7 +172,7 @@
     }
 
     .chart-container :global(.datatable-container) {
-        max-height: 350px;
+        max-height: 200px;
     }
 
     .chart-container :global(.datatable-table) {
@@ -195,10 +211,15 @@
     tr.YES {
         border-left: 5px solid #0062A3;
     }
-    .elected-check {
+    :global(#app p.subtitle),
+    .subtitle {
         color: var(--grey03);
         font-family: 'BentonSansCond-RegItalic', italic;
         font-size: 0.85rem;
+    }
+    :global(#app p.subhead) {
+        font-family: 'BentonSansCond-RegItalic', italic !important;
+        font-size: 1rem !important;
     }
 
     .candidate-cell {

@@ -7,25 +7,29 @@
 
     // DATA
     import { menuItems } from "$data/menu-items";
-    const dataUrl = 'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json';
+    const dataUrl = 'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json';   
 
     // TEST CODE
     let currentURL = 0;
     const dataURLs = [
         'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json',
-        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022-v2.json'
+        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json'
     ]
 
     // VARIABLES
     let value = null;
     let data = [];
     let filteredData = [];
-    // let jurisdiction = 'city';
+    let timestamp = 'No updates yet...';
     let selectedValue = '139';
     let location = {};
     let mayors = [];
     let councillors = [];
     let trustees = [];
+    let sdLocation = {};
+    let councilElectedCount = 0;
+    let trusteeElectedCount = 0;
+    let activeTab = 'mayor-council';
     const refreshInterval = 1; // in minutes
     const defaultSelectValue = menuItems.find(item => String(item.id) === selectedValue)?.id ?? menuItems[0]?.id ?? '';
 
@@ -38,43 +42,70 @@
         const rawData = await resp.text();
 
         // return JSON.parse(rawData);
-        data = JSON.parse(rawData);
+        const jsonData = JSON.parse(rawData);
+        timestamp = jsonData.timestamp;
+        data = jsonData.data;
 
         // set select menu
         updateSelectMenu();
     }
 
-    function splitData(currentFilteredData) {
+    function getSchoolDistrictArea(currentFilteredData, selectedValue) {
+        const schoolDistrictAreas = currentFilteredData.school_district?.school_district_areas || [];
+        const selectedLocationLabel = selectedValue?.label?.toLowerCase() || '';
+
+        return schoolDistrictAreas.find(area =>
+            selectedLocationLabel.includes(area.name.toLowerCase()) ||
+            area.name.toLowerCase().includes(selectedLocationLabel)
+        ) || schoolDistrictAreas[0];
+    }
+
+    function splitData(currentFilteredData, selectedValue) {
         // reset vars if no location selected (prob don't need this)
         if (!currentFilteredData) {
             location = {};
             mayors = [];
             councillors = [];
+            trustees = [];
+            sdLocation = {};
+            councilElectedCount = 0;
+            trusteeElectedCount = 0;
             return;
         }
 
         // get top-level vars from data
-        const { ballots_cast, councillors_to_elect, logo, name, population, registered_voters, estimated_registered_voters } = currentFilteredData;
+        const { ballots_cast, councillors_to_elect, name, population, registered_voters, estimated_registered_voters } = currentFilteredData;
 
         location = {
             name,
             ballots_cast,
             councillors_to_elect,
-            logo,
             population,
             estimated_registered_voters,
             registered_voters
         };
 
+        const schoolDistrictArea = getSchoolDistrictArea(currentFilteredData, selectedValue);
+        sdLocation = schoolDistrictArea
+            ? {
+                name: schoolDistrictArea.name,
+                councillors_to_elect: schoolDistrictArea.councillors_to_elect,
+                trustee: true
+            }
+            : {};
+
         // prep candidate data
-        processCandidates(currentFilteredData);
+        processCandidates(currentFilteredData, schoolDistrictArea);
     }
 
-    function processCandidates(currentFilteredData) {
-        // console.log('PROCESS CANDIDATES')
+    function processCandidates(currentFilteredData, schoolDistrictArea) {
+        console.log('PROCESS CANDIDATES')
         // console.log(currentFilteredData)
         const candidates = currentFilteredData?.candidates || [];
+        const schoolboardCandidates = schoolDistrictArea?.candidates || [];
         const totalVotes = Number(location.ballots_cast || 0);
+
+        console.log(currentFilteredData.school_district)
 
         // separate out mayor candidates & calculate vote %
         const mayorCandidates = candidates.filter(d => d.running_for == 'MAYOR');
@@ -91,19 +122,23 @@
             total_votes: totalVotes,
             votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
         }));
+        // count how many councillors were elected
+        councilElectedCount = councillorCandidates.filter(d => d.elected === 'YES').length;
 
         // same for school board trustees
-        const trusteeCandidates = candidates.filter(d => d.running_for == 'TRUSTEE');
-        trustees = trusteeCandidates.map(d => ({
+        // const trusteeCandidates = schoolboard.filter(d => d.running_for == 'TRUSTEE');
+        trustees = schoolboardCandidates.map(d => ({
             ...d,
             total_votes: totalVotes,
             votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
         }));
+        // count how many trustees were elected
+        trusteeElectedCount = schoolboardCandidates.filter(d => d.elected === 'YES').length;
     }
 
     function updateData(selectedValue) {
-        console.log('UPDATE DATA');
-        console.log(selectedValue)
+        // console.log('UPDATE DATA');
+        // console.log(selectedValue)
 
         const selectedKey = typeof selectedValue === 'string'
             ? selectedValue
@@ -119,11 +154,15 @@
             location = {};
             mayors = [];
             councillors = [];
+            trustees = [];
+            sdLocation = {};
+            councilElectedCount = 0;
+            trusteeElectedCount = 0;
             return;
         }
 
         filteredData = [match];
-        splitData(match);
+        splitData(match, selectedValue);
     }
 
     function updateSelectMenu() {
@@ -140,6 +179,7 @@
 
         // get city from URL params
         const urlParams = new URLSearchParams(window.location.search);
+        
         if (urlParams.has('name')) {
             const urlName = urlParams.get('name').toLowerCase();
             value = menuItems.find(item =>
@@ -158,17 +198,17 @@
     onMount(() => {
         init();
 
-        const refreshData = setInterval(() => {
-            if (currentURL === 0) {
-                currentURL = 1;
-            } else {
-                currentURL = 0
-            }
+        // const refreshData = setInterval(() => {
+        //     if (currentURL === 0) {
+        //         currentURL = 1;
+        //     } else {
+        //         currentURL = 0
+        //     }
 
-            fetchData(dataURLs[currentURL]);
-        }, refreshInterval * 60 * 1000);
+        //     fetchData(dataURLs[currentURL]);
+        // }, refreshInterval * 60 * 1000);
 
-        return () => clearInterval(refreshData);
+        // return () => clearInterval(refreshData);
     });
 </script>
 
@@ -191,31 +231,60 @@
 		showChevron="true"
 		listOpen={false}
     />
-    <p class="select-header">Choose a city  <span>⤴️</span></p>
+    <p class="select-header"><span>⬆️</span>  Choose a city  <span>⬆️</span></p>
 
-    <p class="timestamp">Last updated: XXX</p>
+    <p class="timestamp">Last update: {timestamp}</p>
 
-    <!-- key/value block forces Svelte to destroy and recreate the component (and its internal <Table>) whenever the selected city changes -->
-    {#key value?.value || 'default'}
-        <Candidates
-            data={mayors}
-            role="Mayor"
-        />
-    {/key}
-    
-    {#key value?.value || 'default'}
-        <Candidates
-            data={councillors}
-            role="Council"
-        />
-    {/key}
+    <div class="result-tabs" role="tablist" aria-label="Election results">
+        <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'mayor-council'}
+            aria-controls="mayor-council-panel"
+            class:active={activeTab === 'mayor-council'}
+            on:click={() => activeTab = 'mayor-council'}
+        >Mayor/Council</button>
+        <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'school-park-board'}
+            aria-controls="school-park-board-panel"
+            class:active={activeTab === 'school-park-board'}
+            on:click={() => activeTab = 'school-park-board'}
+        >School/Park board</button>
+    </div>
 
-    {#key value?.value || 'default'}
-        <Candidates
-            data={trustees}
-            role="School board"
-        />
-    {/key}
+    {#if activeTab === 'mayor-council'}
+        <section id="mayor-council-panel" role="tabpanel">
+            <!-- key/value block forces Svelte to recreate each table when the selected city changes -->
+            {#key value?.id || 'default'}
+                <Candidates
+                    data={mayors}
+                    role="Mayor"
+                />
+            {/key}
+            
+            {#key value?.id || 'default'}
+                <Candidates
+                    data={councillors}
+                    electedCount={councilElectedCount}
+                    location={location}
+                    role="Council"
+                />
+            {/key}
+        </section>
+    {:else}
+        <section id="school-park-board-panel" role="tabpanel">
+            {#key value?.id || 'default'}
+                <Candidates
+                    data={trustees}
+                    electedCount={trusteeElectedCount}
+                    location={sdLocation}
+                    role="School board"
+                />
+            {/key}
+        </section>
+    {/if}
 
 </main>
 
@@ -239,8 +308,39 @@
 		text-align: center;
 	}
 
-    /* COMBOBOX SELECTOR */
-    :global(p.select-header, p.timestamp) {
+    .result-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--grey03);
+        margin: 1.5rem 0;
+    }
+
+    .result-tabs button {
+        background: transparent;
+        border: 0;
+        border-bottom: 3px solid transparent;
+        color: var(--grey03);
+        cursor: pointer;
+        font-family: BentonSansCond-Bold, sans-serif;
+        font-size: 1rem;
+        padding: 0.65rem 1rem 0.5rem;
+    }
+
+    .result-tabs button.active {
+        border-bottom-color: #0062a3;
+        color: var(--black);
+    }
+
+    .result-tabs button:focus-visible {
+        outline: 2px solid #0062a3;
+        outline-offset: -2px;
+    }
+    :global(p.select-header) {
+        font-family: 'BentonSansCond-bold' !important;
+        font-size: 1.2rem;
+        margin: 0 auto 2vh 0;
+        text-align: center;
+    }
+    :global(p.timestamp) {
         color: var(--grey03) !important;
         font-family: 'BentonSansCond-RegItalic', italic !important;
         font-size: 1rem;
@@ -250,6 +350,7 @@
      :global(p.select-header > span) {
         font-size: 0.85rem;
      }
+    /* COMBOBOX SELECTOR */
   	:global(.svelte-select) {
         border: none !important;
 		margin: 0 auto !important;
@@ -266,6 +367,7 @@
         justify-content: center;
         width: 100%;
         text-align: center;
+        text-decoration: underline;
         padding-right: 0;
 
         color: var(--blue01) !important;

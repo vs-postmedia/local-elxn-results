@@ -25,11 +25,6 @@ export const menuItems = [
     "value": "burnaby"
   },
   {
-    "id": "15",
-    "label": "Chilliwack",
-    "value": "chilliwack"
-  },
-  {
     "id": "20",
     "label": "Coquitlam",
     "value": "coquitlam"
@@ -40,19 +35,9 @@ export const menuItems = [
     "value": "delta"
   },
   {
-    "id": "43",
-    "label": "Harrison Hot Springs",
-    "value": "harrison-hot-springs"
-  },
-  {
-    "id": "46",
-    "label": "Hope",
-    "value": "hope"
-  },
-  {
-    "id": "53",
-    "label": "Kent",
-    "value": "kent"
+    "id": "164",
+    "label": "Electoral Area A",
+    "value": "electoral-area-a"
   },
   {
     "id": "61",
@@ -75,11 +60,6 @@ export const menuItems = [
     "value": "maple-ridge"
   },
   {
-    "id": "75",
-    "label": "Mission",
-    "value": "mission"
-  },
-  {
     "id": "82",
     "label": "New Westminster",
     "value": "new-westminster"
@@ -93,11 +73,6 @@ export const menuItems = [
     "id": "86",
     "label": "North Vancouver (D)",
     "value": "north-vancouver-district"
-  },
-  {
-    "id": "92",
-    "label": "Pemberton",
-    "value": "pemberton"
   },
   {
     "id": "94",
