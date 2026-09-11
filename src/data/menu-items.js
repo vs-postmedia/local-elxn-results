@@ -35,9 +35,9 @@ export const menuItems = [
     "value": "delta"
   },
   {
-    "id": "164",
-    "label": "Electoral Area A",
-    "value": "electoral-area-a"
+      "id": "164_85",
+      "label": "Electoral Area A",
+      "value": "electoral-area-a"
   },
   {
     "id": "61",

@@ -11,8 +11,8 @@
     let resizeTimer;
     let lastRowSignature = '';
 
-    $: console.log('lOCATION')
-    $: console.log(location)
+    // $: console.log('lOCATION')
+    // $: console.log(location)
 
     $: datatableOptions = {
         searchable: true,

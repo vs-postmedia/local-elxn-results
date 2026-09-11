@@ -5,20 +5,19 @@
 
 ## Story URL:
 
-- add incumbent marker ✅
-– mayor/council & school/park tabs
+– ADD park board candidates
+✅ - add incumbent marker 
+✅ – mayor/council & school/park tabs 
 – Tsawassen race
 – Electoral Area A
-– keep abby/whistler/squamish, drop others
-– Keep white Rock/Surrey separate - they have shared board but don't vote for each other's members
+    – ELECTORAL AREA DIRECTOR
+✅ – keep abby/whistler/squamish, drop others
+✅ – Keep white Rock/Surrey separate - they have shared board but don't vote for each other's members
     – note eg: 1 "trustee is elected by white rock voters"
-– school boards - some are combined
-– council - include total number of councillors (X of XX councillors elected/acclaimed) ✅
-– add timestamp
-- Electoral area A
-    – id: 164, name: Metro Vancouver
-
-– clean up data: ✅
+✅ – school boards - some are combined
+✅ – council - include total number of councillors (X of XX councillors elected/acclaimed)
+✅ – add timestamp
+✅ – clean up data:
     - id
     - ballots_cast
     – candidates
@@ -32,11 +31,6 @@
     – registered_voters
     – population
     – 
-    ADD:
-        – school district candidates
-            – trustees_to_elect
-        – park board candidates
-            – trustees_to_elect
 
 
 

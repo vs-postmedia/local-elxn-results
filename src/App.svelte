@@ -26,8 +26,10 @@
     let mayors = [];
     let councillors = [];
     let trustees = [];
+    let eaDirectors = [];
     let sdLocation = {};
     let councilElectedCount = 0;
+    let eaDirectorsElectedCount = 0;
     let trusteeElectedCount = 0;
     let activeTab = 'mayor-council';
     const refreshInterval = 1; // in minutes
@@ -67,8 +69,10 @@
             mayors = [];
             councillors = [];
             trustees = [];
+            eaDirectors = [];
             sdLocation = {};
             councilElectedCount = 0;
+            eaDirectorsElectedCount = 0;
             trusteeElectedCount = 0;
             return;
         }
@@ -100,12 +104,10 @@
 
     function processCandidates(currentFilteredData, schoolDistrictArea) {
         console.log('PROCESS CANDIDATES')
-        // console.log(currentFilteredData)
+        console.log(currentFilteredData)
         const candidates = currentFilteredData?.candidates || [];
         const schoolboardCandidates = schoolDistrictArea?.candidates || [];
         const totalVotes = Number(location.ballots_cast || 0);
-
-        console.log(currentFilteredData.school_district)
 
         // separate out mayor candidates & calculate vote %
         const mayorCandidates = candidates.filter(d => d.running_for == 'MAYOR');
@@ -134,6 +136,18 @@
         }));
         // count how many trustees were elected
         trusteeElectedCount = schoolboardCandidates.filter(d => d.elected === 'YES').length;
+
+        const electoralAreaDirectorCandidates = candidates.filter(d => d.running_for == 'ELECTORAL AREA DIRECTOR');
+        eaDirectors = electoralAreaDirectorCandidates.map(d => ({
+            ...d,
+            total_votes: totalVotes,
+            votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
+        }));
+        // count how many directors were elected
+        eaDirectorsElectedCount = electoralAreaDirectorCandidates.filter(d => d.elected === 'YES').length;
+
+        console.log('eaDirectors')
+        console.log(eaDirectors)
     }
 
     function updateData(selectedValue) {
@@ -155,14 +169,19 @@
             mayors = [];
             councillors = [];
             trustees = [];
+            eaDirectors = [];
             sdLocation = {};
             councilElectedCount = 0;
+            eaDirectorsElectedCount = 0;
             trusteeElectedCount = 0;
             return;
         }
 
         filteredData = [match];
         splitData(match, selectedValue);
+
+        console.log('UPDATE')
+        console.log(match, selectedValue)
     }
 
     function updateSelectMenu() {
@@ -235,55 +254,66 @@
 
     <p class="timestamp">Last update: {timestamp}</p>
 
-    <div class="result-tabs" role="tablist" aria-label="Election results">
-        <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'mayor-council'}
-            aria-controls="mayor-council-panel"
-            class:active={activeTab === 'mayor-council'}
-            on:click={() => activeTab = 'mayor-council'}
-        >Mayor/Council</button>
-        <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'school-park-board'}
-            aria-controls="school-park-board-panel"
-            class:active={activeTab === 'school-park-board'}
-            on:click={() => activeTab = 'school-park-board'}
-        >School/Park board</button>
-    </div>
+    {#if eaDirectors.length > 0}
+        {#key value?.id || 'default'}
+            <Candidates
+                data={eaDirectors}
+                role="Directors"
+            />
+        {/key}
+    {/if}
 
-    {#if activeTab === 'mayor-council'}
-        <section id="mayor-council-panel" role="tabpanel">
-            <!-- key/value block forces Svelte to recreate each table when the selected city changes -->
-            {#key value?.id || 'default'}
-                <Candidates
-                    data={mayors}
-                    role="Mayor"
-                />
-            {/key}
-            
-            {#key value?.id || 'default'}
-                <Candidates
-                    data={councillors}
-                    electedCount={councilElectedCount}
-                    location={location}
-                    role="Council"
-                />
-            {/key}
-        </section>
-    {:else}
-        <section id="school-park-board-panel" role="tabpanel">
-            {#key value?.id || 'default'}
-                <Candidates
-                    data={trustees}
-                    electedCount={trusteeElectedCount}
-                    location={sdLocation}
-                    role="School board"
-                />
-            {/key}
-        </section>
+    {#if eaDirectors.length === 0}
+        <div class="result-tabs" role="tablist" aria-label="Election results">
+            <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'mayor-council'}
+                aria-controls="mayor-council-panel"
+                class:active={activeTab === 'mayor-council'}
+                on:click={() => activeTab = 'mayor-council'}
+            >Mayor/Council</button>
+            <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'school-park-board'}
+                aria-controls="school-park-board-panel"
+                class:active={activeTab === 'school-park-board'}
+                on:click={() => activeTab = 'school-park-board'}
+            >School/Park board</button>
+        </div>
+
+        {#if activeTab === 'mayor-council'}
+            <section id="mayor-council-panel" role="tabpanel">
+                <!-- key/value block forces Svelte to recreate each table when the selected city changes -->
+                {#key value?.id || 'default'}
+                    <Candidates
+                        data={mayors}
+                        role="Mayor"
+                    />
+                {/key}
+                
+                {#key value?.id || 'default'}
+                    <Candidates
+                        data={councillors}
+                        electedCount={councilElectedCount}
+                        location={location}
+                        role="Council"
+                    />
+                {/key}
+            </section>
+        {:else}
+            <section id="school-park-board-panel" role="tabpanel">
+                {#key value?.id || 'default'}
+                    <Candidates
+                        data={trustees}
+                        electedCount={trusteeElectedCount}
+                        location={sdLocation}
+                        role="School board"
+                    />
+                {/key}
+            </section>
+        {/if}
     {/if}
 
 </main>
