@@ -26,8 +26,7 @@ body {
 #app h1 {
 	color: var(--black);
 	font-family: Shift-BoldItalic, serif;
-	font-size: 2rem;
-	/* margin-bottom: 0.5rem; */
+	font-size: 1.8rem;
 }
 #app h2 {
 	color: var(--black);
@@ -74,6 +73,9 @@ body {
 
 @media only screen and (min-width: 500px) {
     /* Style adjustments for viewports that meet the condition */
+	#app h1 {
+		font-size: 2rem;
+	}
 	#app footer {
 		/* display: flex; */
 		/* justify-content: space-between; */

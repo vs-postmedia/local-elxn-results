@@ -7,7 +7,7 @@
 
     // DATA
     import { menuItems } from "$data/menu-items";
-    const dataUrl = 'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json';   
+    const dataUrl = 'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2026.json';   
 
     // TEST CODE
     let currentURL = 0;
@@ -23,14 +23,17 @@
     let timestamp = 'No updates yet...';
     let selectedValue = '139';
     let location = {};
+    let sdLocation = {};
+    let parkLocation = {};
     let mayors = [];
     let councillors = [];
-    let trustees = [];
+    let schoolTrustees = [];
     let eaDirectors = [];
-    let sdLocation = {};
+    let parkTrustees = [];
     let councilElectedCount = 0;
-    let eaDirectorsElectedCount = 0;
     let trusteeElectedCount = 0;
+    let parkboardElectedCount = 0
+    let eaDirectorsElectedCount = 0;
     let activeTab = 'mayor-council';
     const refreshInterval = 1; // in minutes
     const defaultSelectValue = menuItems.find(item => String(item.id) === selectedValue)?.id ?? menuItems[0]?.id ?? '';
@@ -68,7 +71,7 @@
             location = {};
             mayors = [];
             councillors = [];
-            trustees = [];
+            c = [];
             eaDirectors = [];
             sdLocation = {};
             councilElectedCount = 0;
@@ -97,16 +100,23 @@
                 trustee: true
             }
             : {};
+        
+        parkLocation = currentFilteredData.park_board
+            ? {
+                councillors_to_elect: currentFilteredData.park_board.councillors_to_elect
+            }
+            : {};
 
         // prep candidate data
         processCandidates(currentFilteredData, schoolDistrictArea);
     }
 
     function processCandidates(currentFilteredData, schoolDistrictArea) {
-        console.log('PROCESS CANDIDATES')
-        console.log(currentFilteredData)
+        // console.log('PROCESS CANDIDATES')
+        // console.log(currentFilteredData)
         const candidates = currentFilteredData?.candidates || [];
         const schoolboardCandidates = schoolDistrictArea?.candidates || [];
+        const parkboardCandidates = currentFilteredData.park_board?.candidates || [];
         const totalVotes = Number(location.ballots_cast || 0);
 
         // separate out mayor candidates & calculate vote %
@@ -129,7 +139,7 @@
 
         // same for school board trustees
         // const trusteeCandidates = schoolboard.filter(d => d.running_for == 'TRUSTEE');
-        trustees = schoolboardCandidates.map(d => ({
+        schoolTrustees = schoolboardCandidates.map(d => ({
             ...d,
             total_votes: totalVotes,
             votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
@@ -137,6 +147,7 @@
         // count how many trustees were elected
         trusteeElectedCount = schoolboardCandidates.filter(d => d.elected === 'YES').length;
 
+        // Electoral Area A
         const electoralAreaDirectorCandidates = candidates.filter(d => d.running_for == 'ELECTORAL AREA DIRECTOR');
         eaDirectors = electoralAreaDirectorCandidates.map(d => ({
             ...d,
@@ -146,8 +157,15 @@
         // count how many directors were elected
         eaDirectorsElectedCount = electoralAreaDirectorCandidates.filter(d => d.elected === 'YES').length;
 
-        console.log('eaDirectors')
-        console.log(eaDirectors)
+        // Vancouver Park board
+        const parkTrusteeCandidates = parkboardCandidates.filter(d => d.running_for == 'COMMISSIONER');
+        parkTrustees = parkTrusteeCandidates.map(d => ({
+            ...d,
+            total_votes: totalVotes,
+            votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
+        }));
+        // count how many directors were elected
+        parkboardElectedCount = parkTrusteeCandidates.filter(d => d.elected === 'YES').length;
     }
 
     function updateData(selectedValue) {
@@ -168,7 +186,7 @@
             location = {};
             mayors = [];
             councillors = [];
-            trustees = [];
+            schoolTrustees = [];
             eaDirectors = [];
             sdLocation = {};
             councilElectedCount = 0;
@@ -179,9 +197,6 @@
 
         filteredData = [match];
         splitData(match, selectedValue);
-
-        console.log('UPDATE')
-        console.log(match, selectedValue)
     }
 
     function updateSelectMenu() {
@@ -233,8 +248,7 @@
 
 
 <header>
-    <h1>2026 local election results for</h1>
-    <!-- <p class="subhead">Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p> -->
+    <h1>2026 local election results</h1>
 </header>
 
 <main>
@@ -304,9 +318,21 @@
             </section>
         {:else}
             <section id="school-park-board-panel" role="tabpanel">
+                <!-- parkboard -->
+                {#if parkTrustees.length > 0}
+                    {#key value?.id || 'default'}
+                        <Candidates
+                            data={parkTrustees}
+                            electedCount={councilElectedCount}
+                            location={parkLocation}
+                            role="Park board"
+                        />
+                    {/key}
+                {/if}
+                <!-- school board -->
                 {#key value?.id || 'default'}
                     <Candidates
-                        data={trustees}
+                        data={schoolTrustees}
                         electedCount={trusteeElectedCount}
                         location={sdLocation}
                         role="School board"
@@ -330,6 +356,7 @@
     @import '$css/app.css';
 
 	header > h1 {
+        margin-bottom: 10px;
 		text-align: center;
 	}
 	header .subhead {

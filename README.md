@@ -1,19 +1,20 @@
 # Local election results, 2026
 
 ## EMBED CODE GITHUB
-[protected-iframe info="https://vs-postmedia.github.io/local-elxn-results/" height="2000"]
+[protected-iframe info="https://vs-postmedia.github.io/local-elxn-results/" height="1500"]
 
 ## Story URL:
 
-– ADD park board candidates
+– Tsawassen race
+– turnout
+✅ – ADD park board candidates
 ✅ - add incumbent marker 
 ✅ – mayor/council & school/park tabs 
-– Tsawassen race
-– Electoral Area A
-    – ELECTORAL AREA DIRECTOR
+✅ – Electoral Area A
+✅     – ELECTORAL AREA DIRECTOR
 ✅ – keep abby/whistler/squamish, drop others
 ✅ – Keep white Rock/Surrey separate - they have shared board but don't vote for each other's members
-    – note eg: 1 "trustee is elected by white rock voters"
+✅     – note eg: 1 "trustee is elected by white rock voters"
 ✅ – school boards - some are combined
 ✅ – council - include total number of councillors (X of XX councillors elected/acclaimed)
 ✅ – add timestamp

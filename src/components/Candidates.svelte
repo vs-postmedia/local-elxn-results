@@ -11,8 +11,8 @@
     let resizeTimer;
     let lastRowSignature = '';
 
-    // $: console.log('lOCATION')
-    // $: console.log(location)
+    $: console.log('lOCATION')
+    $: console.log(location)
 
     $: datatableOptions = {
         searchable: true,
@@ -183,7 +183,7 @@
 
     .chart-container :global(.datatable-table th),
     .chart-container :global(.datatable-table td) {
-        padding: 0.6rem 0.75rem;
+        padding: 0.4rem 0.5rem;
         text-align: left;
     }
 
