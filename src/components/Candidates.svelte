@@ -11,8 +11,8 @@
     let resizeTimer;
     let lastRowSignature = '';
 
-    $: console.log('lOCATION')
-    $: console.log(location)
+    // $: console.log('lOCATION')
+    // $: console.log(location)
 
     $: datatableOptions = {
         searchable: true,
@@ -129,7 +129,15 @@
                                     <!-- <span class='subtitle'>{candidate.elected === 'YES' && candidate.acclamation !== 'YES' ? ' elected' : '' }</span> -->
                                 </div>
                                 <div class="party-name">
-                                    {candidate.electoral_organization?.electoral_organization_name === 'None' ? '' : candidate.electoral_organization?.electoral_organization_name.replace(' Electors', '').replace(' Association', '') || ''}
+                                    {candidate.electoral_organization?.electoral_organization_name === 'None' ? '' : candidate.electoral_organization?.electoral_organization_name
+                                        // clean up official non-profit society names
+                                        .replace(/ Electors Coalition/, '')
+                                        .replace(/ Electors/i, '')
+                                        .replace(/ Society/i, '')
+                                        .replace(/ Voters/i, '')
+                                        .replace(/ Public Interest/i, '')
+                                        .replace(/ Association/i, '') 
+                                    || ''}
                                 </div>
                             </div>
                         </td>

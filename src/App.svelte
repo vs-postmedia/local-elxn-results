@@ -1,7 +1,7 @@
 <script>
     // COMPONENTS
     import { onMount } from "svelte";
-    import City from "$components/City.svelte";
+    import Ballots from "$components/Ballots.svelte";
     import Candidates from "$components/Candidates.svelte";
     import Select from "svelte-select"; // https://github.com/rob-balfre/svelte-select
 
@@ -19,6 +19,7 @@
     // VARIABLES
     let value = null;
     let data = [];
+    let ballotData = [];
     let filteredData = [];
     let timestamp = 'No updates yet...';
     let selectedValue = '139';
@@ -34,6 +35,7 @@
     let trusteeElectedCount = 0;
     let parkboardElectedCount = 0
     let eaDirectorsElectedCount = 0;
+    let cityBallotResults = [];
     let activeTab = 'mayor-council';
     const refreshInterval = 1; // in minutes
     const defaultSelectValue = menuItems.find(item => String(item.id) === selectedValue)?.id ?? menuItems[0]?.id ?? '';
@@ -48,8 +50,11 @@
 
         // return JSON.parse(rawData);
         const jsonData = JSON.parse(rawData);
-        timestamp = jsonData.timestamp;
         data = jsonData.data;
+        timestamp = jsonData.timestamp;
+        ballotData = jsonData.ballotData;
+
+        console.log(jsonData)
 
         // set select menu
         updateSelectMenu();
@@ -192,11 +197,17 @@
             councilElectedCount = 0;
             eaDirectorsElectedCount = 0;
             trusteeElectedCount = 0;
+            cityBallotResults = [];
             return;
         }
 
         filteredData = [match];
         splitData(match, selectedValue);
+
+        cityBallotResults = ballotData.filter(d => String(d.id) === String(match.id));
+        if (activeTab === 'ballot-initiatives' && cityBallotResults.length === 0) {
+            activeTab = 'mayor-council';
+        }
     }
 
     function updateSelectMenu() {
@@ -286,7 +297,7 @@
                 aria-controls="mayor-council-panel"
                 class:active={activeTab === 'mayor-council'}
                 on:click={() => activeTab = 'mayor-council'}
-            >Mayor/Council</button>
+            >Mayor and Council</button>
             <button
                 type="button"
                 role="tab"
@@ -295,6 +306,16 @@
                 class:active={activeTab === 'school-park-board'}
                 on:click={() => activeTab = 'school-park-board'}
             >School/Park board</button>
+            {#if cityBallotResults.length > 0}
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === 'ballot-initiatives'}
+                    aria-controls="ballot-initiatives-panel"
+                    class:active={activeTab === 'ballot-initiatives'}
+                    on:click={() => activeTab = 'ballot-initiatives'}
+                >Ballot initiatives</button>
+            {/if}
         </div>
 
         {#if activeTab === 'mayor-council'}
@@ -316,7 +337,7 @@
                     />
                 {/key}
             </section>
-        {:else}
+        {:else if activeTab === 'school-park-board'}
             <section id="school-park-board-panel" role="tabpanel">
                 <!-- parkboard -->
                 {#if parkTrustees.length > 0}
@@ -336,6 +357,15 @@
                         electedCount={trusteeElectedCount}
                         location={sdLocation}
                         role="School board"
+                    />
+                {/key}
+            </section>
+        {:else if cityBallotResults.length > 0}
+            <section id="ballot-initiatives-panel" role="tabpanel">
+                {#key value?.id || 'default'}
+                    <Ballots
+                        id={value?.id}
+                        ballots={cityBallotResults}
                     />
                 {/key}
             </section>
@@ -383,12 +413,12 @@
     }
 
     .result-tabs button.active {
-        border-bottom-color: #0062a3;
-        color: var(--black);
+        border-bottom-color: var(--blue01);
+        color: var(--blue01);
     }
 
     .result-tabs button:focus-visible {
-        outline: 2px solid #0062a3;
+        outline: 2px solid var(--blue01);
         outline-offset: -2px;
     }
     :global(p.select-header) {
@@ -407,6 +437,7 @@
      :global(p.select-header > span) {
         font-size: 0.85rem;
      }
+
     /* COMBOBOX SELECTOR */
   	:global(.svelte-select) {
         border: none !important;
@@ -446,8 +477,8 @@
 	}
 
     @media (min-width: 600px) {
-    :global(.svelte-select .selected-item) {
-        font-size: 3rem !important;
-    }
+        :global(.svelte-select .selected-item) {
+            font-size: 3rem !important;
+        }
     }
 </style>
