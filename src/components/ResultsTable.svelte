@@ -17,7 +17,6 @@
     export let parkboardElectedCount = 0;
 
     let activeTab = 'mayor-council';
-
     $: if (activeTab === 'ballot-initiatives' && ballotResults.length === 0) {
         activeTab = 'mayor-council';
     }

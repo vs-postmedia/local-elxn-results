@@ -6,7 +6,6 @@
 
     // DATA
     import { menuItems } from "$data/menu-items";
-	// import ResultsTable from "./components/ResultsTable.svelte";
     const dataUrl = 'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2026.json';   
 
     // TEST CODE
@@ -114,61 +113,55 @@
         processCandidates(currentFilteredData, schoolDistrictArea);
     }
 
+    function processCandidateResults(candidates, totalVotes) {
+        return {
+            candidates: candidates.map(candidate => ({
+                ...candidate,
+                total_votes: totalVotes,
+                votes_pct: totalVotes > 0
+                    ? (Number(candidate.votes_for || 0) / totalVotes) * 100
+                    : 0
+            })),
+            electedCount: candidates.filter(candidate => candidate.elected === 'YES').length
+        };
+    }
+
     function processCandidates(currentFilteredData, schoolDistrictArea) {
-        // console.log('PROCESS CANDIDATES')
-        // console.log(currentFilteredData)
         const candidates = currentFilteredData?.candidates || [];
         const schoolboardCandidates = schoolDistrictArea?.candidates || [];
         const parkboardCandidates = currentFilteredData.park_board?.candidates || [];
         const totalVotes = Number(location.ballots_cast || 0);
 
-        // separate out mayor candidates & calculate vote %
-        const mayorCandidates = candidates.filter(d => d.running_for == 'MAYOR');
-        mayors = mayorCandidates.map(d => ({
-            ...d,
-            total_votes: totalVotes,
-            votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
-        }));
-        
-        // same for councillors
-        const councillorCandidates = candidates.filter(d => d.running_for == 'COUNCILLOR');
-        councillors = councillorCandidates.map(d => ({
-            ...d,
-            total_votes: totalVotes,
-            votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
-        }));
-        // count how many councillors were elected
-        councilElectedCount = councillorCandidates.filter(d => d.elected === 'YES').length;
+        const mayorResults = processCandidateResults(
+            candidates.filter(candidate => candidate.running_for === 'MAYOR'),
+            totalVotes
+        );
+        mayors = mayorResults.candidates;
 
-        // same for school board trustees
-        // const trusteeCandidates = schoolboard.filter(d => d.running_for == 'TRUSTEE');
-        schoolTrustees = schoolboardCandidates.map(d => ({
-            ...d,
-            total_votes: totalVotes,
-            votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
-        }));
-        // count how many trustees were elected
-        trusteeElectedCount = schoolboardCandidates.filter(d => d.elected === 'YES').length;
+        const councilResults = processCandidateResults(
+            candidates.filter(candidate => candidate.running_for === 'COUNCILLOR'),
+            totalVotes
+        );
+        councillors = councilResults.candidates;
+        councilElectedCount = councilResults.electedCount;
 
-        // Electoral Area A
-        const electoralAreaDirectorCandidates = candidates.filter(d => d.running_for == 'ELECTORAL AREA DIRECTOR');
-        eaDirectors = electoralAreaDirectorCandidates.map(d => ({
-            ...d,
-            total_votes: totalVotes,
-            votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
-        }));
-        // count how many directors were elected
-        eaDirectorsElectedCount = electoralAreaDirectorCandidates.filter(d => d.elected === 'YES').length;
+        const trusteeResults = processCandidateResults(schoolboardCandidates, totalVotes);
+        schoolTrustees = trusteeResults.candidates;
+        trusteeElectedCount = trusteeResults.electedCount;
 
-        // Vancouver Park board
-        const parkTrusteeCandidates = parkboardCandidates.filter(d => d.running_for == 'COMMISSIONER');
-        parkTrustees = parkTrusteeCandidates.map(d => ({
-            ...d,
-            total_votes: totalVotes,
-            votes_pct: totalVotes > 0 ? (Number(d.votes_for || 0) / totalVotes) * 100 : 0
-        }));
-        // count how many directors were elected
-        parkboardElectedCount = parkTrusteeCandidates.filter(d => d.elected === 'YES').length;
+        const directorResults = processCandidateResults(
+            candidates.filter(candidate => candidate.running_for === 'ELECTORAL AREA DIRECTOR'),
+            totalVotes
+        );
+        eaDirectors = directorResults.candidates;
+        eaDirectorsElectedCount = directorResults.electedCount;
+
+        const parkResults = processCandidateResults(
+            parkboardCandidates.filter(candidate => candidate.running_for === 'COMMISSIONER'),
+            totalVotes
+        );
+        parkTrustees = parkResults.candidates;
+        parkboardElectedCount = parkResults.electedCount;
     }
 
     function updateData(selectedValue) {
@@ -263,10 +256,6 @@
 </header>
 
 <main>
-    <!-- <City
-        location={location}
-    /> -->
-
     <Select items={menuItems}
         itemId="id"
         bind:value
