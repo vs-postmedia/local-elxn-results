@@ -6,7 +6,8 @@
 ## Story URL:
 
 – Vote share % – CALCULATE WIDTH & PUT # INSIDE BAR!
-– Tsawassen race
+– CRONTAB SCRIPT EVERY 3MIN
+– Tsawassen race - CANT FIND
 – turnout
 ✅ – ADD park board candidates
 ✅ - add incumbent marker 
