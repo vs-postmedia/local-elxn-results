@@ -39,7 +39,10 @@
             .toLowerCase()
             .split(/\s+/)
             .filter(Boolean)
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .map(word => word
+                .replace(/^([a-z])/, letter => letter.toUpperCase())
+                .replace(/([’'])([a-z])/g, (_, apostrophe, letter) => `${apostrophe}${letter.toUpperCase()}`)
+            )
             .join(' ');
     }
 
