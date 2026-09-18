@@ -36,7 +36,7 @@ export const menuItems = [
   },
   {
       "id": "164_85",
-      "label": "Electoral Area A",
+      "label": "Electoral Area A (UBC)",
       "value": "electoral-area-a"
   },
   {

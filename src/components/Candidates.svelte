@@ -4,12 +4,13 @@
     export let location = {};
     export let electedCount = 0;
 
-    import { afterUpdate, onMount } from 'svelte';
+    import { afterUpdate, onMount, tick } from 'svelte';
     import { Table } from '@flowbite-svelte-plugins/datatable';
 
     let dataTableInstance = null;
     let resizeTimer;
     let lastRowSignature = '';
+    let tableReady = false;
 
     // $: console.log('lOCATION')
     // $: console.log(location)
@@ -84,6 +85,9 @@
     onMount(() => {
         window.addEventListener('resize', handleResize);
 
+        // wait a tick so the table element is fully attached before simple-datatables inits it
+        tick().then(() => { tableReady = true; });
+
         return () => {
             window.removeEventListener('resize', handleResize);
             clearTimeout(resizeTimer);
@@ -100,7 +104,7 @@
         <p class="subtitle">{electedCount} of {location.councillors_to_elect} candidates elected/acclaimed</p>
     {/if}
 
-    {#if candidateRows.length}
+    {#if tableReady && candidateRows.length}
         <Table bind:dataTableInstance={dataTableInstance} dataTableOptions={datatableOptions}>
             <thead>
                 <tr>
@@ -120,13 +124,10 @@
                                 <div class="candidate-name">
                                 {#if candidate.acclamation === 'YES' || candidate.elected == 'YES'}
                                     <span class='subtitle'>✅</span>
-                                <!-- {:else}
-                                    <span class='subtitle'>{candidate.elected === 'YES' ? '✅ elected' : '' }</span> -->
                                 {/if}
                                     {candidate.candidate_first_name || ''} {titleCase(candidate.candidate_last_name) || ''}
                                 
                                     <span class='subtitle'>{candidate.previous_experience === 'Incumbent' ? ' (Incumbent)' : '' }</span>
-                                    <!-- <span class='subtitle'>{candidate.elected === 'YES' && candidate.acclamation !== 'YES' ? ' elected' : '' }</span> -->
                                 </div>
                                 <div class="party-name">
                                     {candidate.electoral_organization?.electoral_organization_name === 'None' ? '' : candidate.electoral_organization?.electoral_organization_name
@@ -165,7 +166,7 @@
 
 <style>
     .chart-container {
-        margin-bottom: 5vh;
+        margin-bottom: 2vh;
         width: 100%;
     }
 

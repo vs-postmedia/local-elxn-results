@@ -12,14 +12,14 @@
     // TEST CODE
     let currentURL = 0;
     const dataURLs = [
-        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json',
-        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json'
+        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2026.json',
+        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2026-test.json'
     ]
 
     // VARIABLES
     let value = null;
     let data = [];
-    let ballotData = [];
+    let ballotResults = [];
     let filteredData = [];
     let timestamp = 'No updates yet...';
     let selectedValue = '139';
@@ -35,7 +35,6 @@
     let trusteeElectedCount = 0;
     let parkboardElectedCount = 0
     let eaDirectorsElectedCount = 0;
-    let cityBallotResults = [];
     let activeTab = 'mayor-council';
     const refreshInterval = 1; // in minutes
     const defaultSelectValue = menuItems.find(item => String(item.id) === selectedValue)?.id ?? menuItems[0]?.id ?? '';
@@ -52,8 +51,8 @@
         const jsonData = JSON.parse(rawData);
         data = jsonData.data;
         timestamp = jsonData.timestamp;
-        ballotData = jsonData.ballotData;
 
+        console.log('FETCH DATA')
         console.log(jsonData)
 
         // set select menu
@@ -197,15 +196,17 @@
             councilElectedCount = 0;
             eaDirectorsElectedCount = 0;
             trusteeElectedCount = 0;
-            cityBallotResults = [];
             return;
         }
 
         filteredData = [match];
         splitData(match, selectedValue);
 
-        cityBallotResults = ballotData.filter(d => String(d.id) === String(match.id));
-        if (activeTab === 'ballot-initiatives' && cityBallotResults.length === 0) {
+        console.log("MATCH")
+        console.log(match)
+
+        ballotResults = match.ballot_results.filter(d => String(d.id) === String(match.id));
+        if (activeTab === 'ballot-initiatives' && ballotResults.length === 0) {
             activeTab = 'mayor-council';
         }
     }
@@ -243,17 +244,17 @@
     onMount(() => {
         init();
 
-        // const refreshData = setInterval(() => {
-        //     if (currentURL === 0) {
-        //         currentURL = 1;
-        //     } else {
-        //         currentURL = 0
-        //     }
+        const refreshData = setInterval(() => {
+            if (currentURL === 0) {
+                currentURL = 1;
+            } else {
+                currentURL = 0
+            }
 
-        //     fetchData(dataURLs[currentURL]);
-        // }, refreshInterval * 60 * 1000);
+            fetchData(dataURLs[currentURL]);
+        }, refreshInterval * 60 * 1000);
 
-        // return () => clearInterval(refreshData);
+        return () => clearInterval(refreshData);
     });
 </script>
 
@@ -306,7 +307,7 @@
                 class:active={activeTab === 'school-park-board'}
                 on:click={() => activeTab = 'school-park-board'}
             >School/Park board</button>
-            {#if cityBallotResults.length > 0}
+            {#if ballotResults.length > 0}
                 <button
                     type="button"
                     role="tab"
@@ -360,12 +361,12 @@
                     />
                 {/key}
             </section>
-        {:else if cityBallotResults.length > 0}
+        {:else if ballotResults.length > 0}
             <section id="ballot-initiatives-panel" role="tabpanel">
                 {#key value?.id || 'default'}
                     <Ballots
                         id={value?.id}
-                        ballots={cityBallotResults}
+                        ballots={ballotResults}
                     />
                 {/key}
             </section>
@@ -387,11 +388,6 @@
 
 	header > h1 {
         margin-bottom: 10px;
-		text-align: center;
-	}
-	header .subhead {
-		margin: 0 auto;
-		max-width: 525px;
 		text-align: center;
 	}
 

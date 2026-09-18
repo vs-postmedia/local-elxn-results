@@ -1,5 +1,4 @@
 <script>
-    export let id = '';
     export let ballots = [];
 
     let width = 0;
@@ -26,6 +25,8 @@
     function init() {
         console.log('BALLOT INIT!')
 
+        console.log(ballots)
+
     }
 
     // LIGHTS! CAMERA! ACTION!
@@ -43,7 +44,13 @@
         {#if ballot.passed !== undefined}
             {#if ballot.passed !== null}
                 <p class="result" class:passed={ballot.passed}>
-                    {ballot.passed ? 'Passed' : 'Did not pass'}
+                    {#if ballot.passed === 'YES'}
+                        <span class='subtitle'>✅</span>
+                    {/if}
+                    {#if ballot.passed === 'NO'}
+                        <span class='subtitle'>🚫</span>
+                    {/if}
+                    {ballot.passed === 'YES' ? 'Passed' : 'Did not pass'}
                 </p>
             {/if}
             <ul class="vote-totals">

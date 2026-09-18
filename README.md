@@ -5,6 +5,7 @@
 
 ## Story URL:
 
+– Vote share % – CALCULATE WIDTH & PUT # INSIDE BAR!
 – Tsawassen race
 – turnout
 ✅ – ADD park board candidates
@@ -31,11 +32,3 @@
     – estimated_eligible_voters
     – registered_voters
     – population
-    – 
-
-
-
-
-
-
-– analysis: compare number/gender/incumbent candidates to previous years
