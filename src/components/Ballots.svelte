@@ -79,7 +79,9 @@
             class:open={expandedBallots[ballot.refid]}
         >
             <div class="full-text-inner">
-                <p class="question">{ballot.question}</p>
+                <div class="question">
+                    <p>{ballot.question}</p>
+                </div>
             </div>
         </div>
     </div>

@@ -129,6 +129,9 @@
                                     <span class='subtitle'>✅</span>
                                 {/if}
                                     {candidate.candidate_first_name || ''} {titleCase(candidate.candidate_last_name) || ''}
+                                    {#if candidate.candidate_chinese_name !== null}
+                                        <span class="chinese-name"> {candidate.candidate_chinese_name}</span>
+                                    {/if}
                                 
                                     <span class='subtitle'>{candidate.previous_experience === 'Incumbent' ? ' (Incumbent)' : '' }</span>
                                 </div>
@@ -243,6 +246,9 @@
     .candidate-name {
         font-weight: 600;
         color: #111827;
+    }
+    .chinese-name {
+        font-family: 'NotoSansSC-Regular'
     }
 
     .party-name {
