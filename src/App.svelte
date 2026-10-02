@@ -12,8 +12,9 @@
     let currentURL = 0;
     const dataURLs = [
         'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2026.json',
-        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2026-test.json'
-    ]
+        'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2022.json',
+        // 'https://raw.githubusercontent.com/vs-postmedia/civic-info-bc-scraper/refs/heads/master/data/data-2026-test.json'
+    ];
 
     // VARIABLES
     let value = null;
@@ -37,7 +38,7 @@
     let eaDirectorsElectedCount = 0;
     
     let activeTab = 'mayor-council';
-    const refreshInterval = 1; // in minutes
+    const refreshInterval = 0.3; // in minutes
     const defaultSelectValue = menuItems.find(item => String(item.id) === selectedValue)?.id ?? menuItems[0]?.id ?? '';
 
     $: if (value && data.length) {
@@ -113,7 +114,11 @@
         processCandidates(currentFilteredData, schoolDistrictArea);
     }
 
-    function processCandidateResults(candidates, totalVotes) {
+    function processCandidateResults(candidates, isMayorRace = false) {
+        const totalVotes = isMayorRace
+            ? candidates.reduce((sum, candidate) => sum + Number(candidate.votes_for || 0), 0)
+            : Number(location.ballots_cast || 0);
+
         return {
             candidates: candidates.map(candidate => ({
                 ...candidate,
@@ -130,35 +135,31 @@
         const candidates = currentFilteredData?.candidates || [];
         const schoolboardCandidates = schoolDistrictArea?.candidates || [];
         const parkboardCandidates = currentFilteredData.park_board?.candidates || [];
-        const totalVotes = Number(location.ballots_cast || 0);
 
         const mayorResults = processCandidateResults(
             candidates.filter(candidate => candidate.running_for === 'MAYOR'),
-            totalVotes
+            true
         );
         mayors = mayorResults.candidates;
 
         const councilResults = processCandidateResults(
-            candidates.filter(candidate => candidate.running_for === 'COUNCILLOR'),
-            totalVotes
+            candidates.filter(candidate => candidate.running_for === 'COUNCILLOR')
         );
         councillors = councilResults.candidates;
         councilElectedCount = councilResults.electedCount;
 
-        const trusteeResults = processCandidateResults(schoolboardCandidates, totalVotes);
+        const trusteeResults = processCandidateResults(schoolboardCandidates);
         schoolTrustees = trusteeResults.candidates;
         trusteeElectedCount = trusteeResults.electedCount;
 
         const directorResults = processCandidateResults(
-            candidates.filter(candidate => candidate.running_for === 'ELECTORAL AREA DIRECTOR'),
-            totalVotes
+            candidates.filter(candidate => candidate.running_for === 'ELECTORAL AREA DIRECTOR')
         );
         eaDirectors = directorResults.candidates;
         eaDirectorsElectedCount = directorResults.electedCount;
 
         const parkResults = processCandidateResults(
-            parkboardCandidates.filter(candidate => candidate.running_for === 'COMMISSIONER'),
-            totalVotes
+            parkboardCandidates.filter(candidate => candidate.running_for === 'COMMISSIONER')
         );
         parkTrustees = parkResults.candidates;
         parkboardElectedCount = parkResults.electedCount;
@@ -193,9 +194,6 @@
 
         filteredData = [match];
         splitData(match, selectedValue);
-
-        console.log("MATCH")
-        console.log(match)
 
         ballotResults = match.ballot_results.filter(d => String(d.id) === String(match.id));
         if (activeTab === 'ballot-initiatives' && ballotResults.length === 0) {

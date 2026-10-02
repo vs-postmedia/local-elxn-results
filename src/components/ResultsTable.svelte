@@ -60,47 +60,43 @@
     </div>
 
         {#if activeTab === 'mayor-council'}
-            <section id="mayor-council-panel" role="tabpanel">
-                <!-- key/value block forces Svelte to recreate each table when the selected city changes -->
-                {#key value?.id || 'default'}
+            <!-- key the whole section on the selected city so all tables fully recreate together -->
+            {#key value?.id || 'default'}
+                <section id="mayor-council-panel" role="tabpanel">
                     <Candidates
                         data={mayors}
                         role="Mayor"
                     />
-                {/key}
-                
-                {#key value?.id || 'default'}
+
                     <Candidates
                         data={councillors}
                         electedCount={councilElectedCount}
                         location={location}
                         role="Council"
                     />
-                {/key}
-            </section>
+                </section>
+            {/key}
         {:else if activeTab === 'school-park-board'}
-            <section id="school-park-board-panel" role="tabpanel">
-                <!-- parkboard -->
-                {#if parkTrustees.length > 0}
-                    {#key value?.id || 'default'}
+            {#key value?.id || 'default'}
+                <section id="school-park-board-panel" role="tabpanel">
+                    <!-- parkboard -->
+                    {#if parkTrustees.length > 0}
                         <Candidates
                             data={parkTrustees}
                             electedCount={parkboardElectedCount}
                             location={parkLocation}
                             role="Park board"
                         />
-                    {/key}
-                {/if}
-                <!-- school board -->
-                {#key value?.id || 'default'}
+                    {/if}
+                    <!-- school board -->
                     <Candidates
                         data={schoolTrustees}
                         electedCount={trusteeElectedCount}
                         location={sdLocation}
                         role="School board"
                     />
-                {/key}
-            </section>
+                </section>
+            {/key}
         {:else if ballotResults.length > 0}
             <section id="ballot-initiatives-panel" role="tabpanel">
                 {#key value?.id || 'default'}

@@ -4,12 +4,11 @@
     export let location = {};
     export let electedCount = 0;
 
-    import { afterUpdate, onMount, tick } from 'svelte';
+    import { onMount, tick } from 'svelte';
     import { Table } from '@flowbite-svelte-plugins/datatable';
 
     let dataTableInstance = null;
     let resizeTimer;
-    let lastRowSignature = '';
     let tableReady = false;
 
     // $: console.log('lOCATION')
@@ -64,26 +63,21 @@
         }))
         .sort((a, b) => b.votes_for - a.votes_for);
 
+    $: rowSignature = JSON.stringify(candidateRows.map(row => [
+        getCandidateName(row),
+        row.candidate_chinese_name || '',
+        Number(row.votes_for || 0),
+        Number(row.votes_pct || 0),
+        row.elected || '',
+        row.acclamation || ''
+    ]));
+
     function handleResize() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-            dataTableInstance?.update?.(true);
+            dataTableInstance?.refresh?.();
         }, 100);
     }
-
-    afterUpdate(() => {
-        const rowSignature = JSON.stringify(candidateRows.map(row => ({
-            candidate: getCandidateName(row),
-            votes_for: Number(row.votes_for || 0),
-            votes_pct: Number(row.votes_pct || 0),
-            elected: row.elected || ''
-        })));
-
-        if (dataTableInstance && rowSignature !== lastRowSignature) {
-            lastRowSignature = rowSignature;
-            dataTableInstance?.update?.(true);
-        }
-    });
 
     onMount(() => {
         window.addEventListener('resize', handleResize);
@@ -104,10 +98,11 @@
         <p class="subhead">{location.name}</p>
     {/if}
     {#if location.councillors_to_elect}
-        <p class="subtitle">{electedCount} of {location.councillors_to_elect} candidates elected/acclaimed</p>
+        <p class="subtitle">{electedCount} of {location.councillors_to_elect} candidates elected</p>
     {/if}
 
     {#if tableReady && candidateRows.length}
+        {#key rowSignature}
         <Table bind:dataTableInstance={dataTableInstance} dataTableOptions={datatableOptions}>
             <thead>
                 <tr>
@@ -129,9 +124,7 @@
                                     <span class='subtitle'>✅</span>
                                 {/if}
                                     {candidate.candidate_first_name || ''} {titleCase(candidate.candidate_last_name) || ''}
-                                    {#if candidate.candidate_chinese_name !== null}
-                                        <span class="chinese-name"> {candidate.candidate_chinese_name}</span>
-                                    {/if}
+                                    <span class="chinese-name"> {candidate.candidate_chinese_name || ''}</span>
                                 
                                     <span class='subtitle'>{candidate.previous_experience === 'Incumbent' ? ' (Incumbent)' : '' }</span>
                                 </div>
@@ -167,6 +160,7 @@
                 {/each}
             </tbody>
         </Table>
+        {/key}
     {/if}
 </div>
 
