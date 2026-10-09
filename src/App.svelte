@@ -17,12 +17,14 @@
     ];
 
     // VARIABLES
+    const refreshInterval = 5; // in minutes
     let value = null;
     let data = [];
     let ballotResults = [];
     let filteredData = [];
     let timestamp = 'No updates yet...';
     let selectedValue = '139';
+    let activeTab = 'mayor-council';
 
     let location = {};
     let sdLocation = {};
@@ -36,9 +38,6 @@
     let trusteeElectedCount = 0;
     let parkboardElectedCount = 0
     let eaDirectorsElectedCount = 0;
-    
-    let activeTab = 'mayor-council';
-    const refreshInterval = 0.3; // in minutes
     const defaultSelectValue = menuItems.find(item => String(item.id) === selectedValue)?.id ?? menuItems[0]?.id ?? '';
 
     $: if (value && data.length) {
@@ -46,7 +45,7 @@
     }
 
     async function fetchData(url) {
-        const resp = await fetch(url);
+        const resp = await fetch(`${url}?t=${Date.now()}`, { cache: 'no-store' });
         const rawData = await resp.text();
 
         // return JSON.parse(rawData);
@@ -287,7 +286,7 @@
 
 <footer>
     <p class="note">NOTE: tk.</p>
-    <p class="source">Source:  <a href="https://www.civicinfo.bc.ca/election-results" target="_blank">Civic Info B.C.</a></p>
+    <p class="source">Source:  <a href="https://www.civicinfo.bc.ca/election-results" target="_blank">CivicInfo B.C.</a></p>
 </footer>
   
 <style>
